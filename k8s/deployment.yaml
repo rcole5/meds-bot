@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meds-bot
+  namespace: default
+  labels:
+    app: meds-bot
+spec:
+  replicas: 1  # Only run one instance since we're using SQLite
+  selector:
+    matchLabels:
+      app: meds-bot
+  strategy:
+    type: Recreate  # Use Recreate strategy since we can't have multiple pods accessing SQLite
+  template:
+    metadata:
+      labels:
+        app: meds-bot
+    spec:
+      containers:
+      - name: meds-bot
+        image: meds-bot:latest  # Replace with your image repository
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+        envFrom:
+        - configMapRef:
+            name: meds-bot-config
+        - secretRef:
+            name: meds-bot-secrets
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - ps aux | grep meds-bot | grep -v grep
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - ps aux | grep meds-bot | grep -v grep
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: meds-bot-data

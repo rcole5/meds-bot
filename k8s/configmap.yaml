@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: meds-bot-config
+  namespace: default
+data:
+  DISCORD_CHANNEL_ID: "your-channel-id-here"
+  REMINDER_INTERVAL_MINUTES: "30"
+  
+  # Medication configurations
+  MED_1_NAME: "Morning Pill"
+  MED_1_HOUR: "8"
+  
+  MED_2_NAME: "Morning Vitamin"
+  MED_2_HOUR: "9"
+  
+  MED_3_NAME: "Afternoon Pill"
+  MED_3_HOUR: "14"
