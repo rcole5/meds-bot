@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=1 GOOS=linux go build -a -o meds-bot .
+RUN GOOS=linux go build -a -o meds-bot .
 
 FROM alpine:latest
 

@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/ncruces/go-sqlite3/driver"
+	_ "github.com/ncruces/go-sqlite3/embed"
 )
 
 // StoreInterface defines the interface for database operations
@@ -87,8 +88,6 @@ func (s *Store) initSchema(ctx context.Context) error {
 func (s *Store) GetTodayReminder(ctx context.Context, medicationType string) (*Reminder, error) {
 	today := time.Now().Format("2006-01-02")
 
-	query := "SELECT id, acknowledged, message_id, last_reminder_time FROM reminders WHERE date = ? AND medication_type = ?"
-
 	ctxQuery, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -97,7 +96,7 @@ func (s *Store) GetTodayReminder(ctx context.Context, medicationType string) (*R
 	var messageID sql.NullString
 	var lastReminderTimeStr sql.NullString
 
-	err := s.db.QueryRowContext(ctxQuery, query, today, medicationType).Scan(&id, &acknowledged, &messageID, &lastReminderTimeStr)
+	err := s.db.QueryRowContext(ctxQuery, "SELECT id, acknowledged, message_id, last_reminder_time FROM reminders WHERE date = ? AND medication_type = ?", today, medicationType).Scan(&id, &acknowledged, &messageID, &lastReminderTimeStr)
 
 	if err == nil {
 		var lastReminderTime time.Time
