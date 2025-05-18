@@ -128,7 +128,7 @@ func LoadEnvConfig() (*Config, error) {
 	if err != nil {
 		// Only log a warning, don't fail if .env file doesn't exist
 		// This allows using environment variables without a .env file
-		fmt.Printf("Warning: Error loading .env file: %v\n", err)
+		log.Printf("Warning: Error loading .env file: %v\n", err)
 	}
 
 	token := os.Getenv("DISCORD_TOKEN")
@@ -187,7 +187,7 @@ func LoadEnvConfig() (*Config, error) {
 			Hour: hour,
 		})
 
-		fmt.Printf("Loaded medication: %s, hour: %d\n", name, hour)
+		log.Printf("Loaded medication: %s, hour: %d\n", name, hour)
 	}
 
 	config := &Config{
@@ -206,7 +206,7 @@ func LoadEnvConfig() (*Config, error) {
 	}
 
 	medicationCount := len(medications)
-	fmt.Printf("Loaded %d medications from environment variables\n", medicationCount)
+	log.Printf("Loaded %d medications from environment variables\n", medicationCount)
 
 	return config, nil
 }

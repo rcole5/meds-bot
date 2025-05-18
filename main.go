@@ -138,7 +138,7 @@ func main() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 
-	fmt.Println("Medication reminder bot is now running. Press CTRL-C to exit.")
+	log.Println("Medication reminder bot is now running. Press CTRL-C to exit.")
 
 	sig := <-sigCh
 	log.Printf("Received signal %v, initiating graceful shutdown...", sig)
