@@ -19,7 +19,8 @@ type StoreInterface interface {
 }
 
 type Store struct {
-	db *sql.DB
+	db       *sql.DB
+	location *time.Location
 }
 
 type Reminder struct {
@@ -32,7 +33,7 @@ type Reminder struct {
 }
 
 // NewStore creates a new database store
-func NewStore(ctx context.Context, dbPath string) (*Store, error) {
+func NewStore(ctx context.Context, dbPath string, location *time.Location) (*Store, error) {
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
@@ -50,7 +51,15 @@ func NewStore(ctx context.Context, dbPath string) (*Store, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	store := &Store{db: db}
+	// Use UTC as default if no location is provided
+	if location == nil {
+		location = time.UTC
+	}
+
+	store := &Store{
+		db:       db,
+		location: location,
+	}
 
 	if err := store.initSchema(ctx); err != nil {
 		db.Close()
@@ -86,7 +95,8 @@ func (s *Store) initSchema(ctx context.Context) error {
 
 // GetTodayReminder gets or creates a reminder for today for a specific medication
 func (s *Store) GetTodayReminder(ctx context.Context, medicationType string) (*Reminder, error) {
-	today := time.Now().Format("2006-01-02")
+	// Use the configured timezone to get today's date
+	today := time.Now().In(s.location).Format("2006-01-02")
 
 	ctxQuery, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
@@ -151,7 +161,8 @@ func (s *Store) UpdateReminderStatus(ctx context.Context, id int64, acknowledged
 		ack = 1
 	}
 
-	now := time.Now().Format(time.RFC3339)
+	// Use the configured timezone for the timestamp
+	now := time.Now().In(s.location).Format(time.RFC3339)
 
 	_, err := s.db.ExecContext(ctxUpdate,
 		"UPDATE reminders SET acknowledged = ?, message_id = ?, last_reminder_time = ? WHERE id = ?",

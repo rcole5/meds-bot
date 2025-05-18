@@ -28,6 +28,7 @@ type Config struct {
 	ReminderIntervalMins int
 	Medications          []Medication
 	DBPath               string
+	Timezone             string
 }
 
 type Medication struct {
@@ -107,6 +108,17 @@ func validateConfig(cfg *Config) error {
 		cfg.DBPath = "./meds_reminder.db"
 	}
 
+	// Validate and set default timezone
+	if cfg.Timezone == "" {
+		cfg.Timezone = "UTC"
+	} else {
+		// Check if the timezone is valid
+		_, err := time.LoadLocation(cfg.Timezone)
+		if err != nil {
+			return fmt.Errorf("invalid timezone: %s - %w", cfg.Timezone, err)
+		}
+	}
+
 	return nil
 }
 
@@ -136,6 +148,11 @@ func LoadEnvConfig() (*Config, error) {
 	dbPath := os.Getenv("DB_PATH")
 	if dbPath == "" {
 		dbPath = "./meds_reminder.db"
+	}
+
+	timezone := os.Getenv("TIMEZONE")
+	if timezone == "" {
+		timezone = "UTC" // Default to UTC if not specified
 	}
 
 	var medications []Medication
@@ -180,6 +197,7 @@ func LoadEnvConfig() (*Config, error) {
 		ReminderIntervalMins: interval,
 		Medications:          medications,
 		DBPath:               dbPath,
+		Timezone:             timezone,
 	}
 
 	// Validate the config
@@ -196,4 +214,9 @@ func LoadEnvConfig() (*Config, error) {
 // GetReminderInterval returns the reminder interval as a time.Duration
 func (c *Config) GetReminderInterval() time.Duration {
 	return time.Duration(c.ReminderIntervalMins) * time.Minute
+}
+
+// GetLocation returns the time.Location for the configured timezone
+func (c *Config) GetLocation() (*time.Location, error) {
+	return time.LoadLocation(c.Timezone)
 }

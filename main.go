@@ -26,7 +26,13 @@ func run(ctx context.Context) (reminder.ServiceInterface, error) {
 		return nil, fmt.Errorf("failed to load configuration: %w", err)
 	}
 
-	store, err := db.NewStore(ctx, cfg.DBPath)
+	// Get the location from the config
+	loc, err := cfg.GetLocation()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get timezone location: %w", err)
+	}
+
+	store, err := db.NewStore(ctx, cfg.DBPath, loc)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize database: %w", err)
 	}

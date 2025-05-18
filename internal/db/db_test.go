@@ -14,7 +14,9 @@ func TestGetTodayReminder(t *testing.T) {
 
 	// Create a new store
 	ctx := context.Background()
-	store, err := NewStore(ctx, dbPath)
+	// Use UTC for testing
+	loc := time.UTC
+	store, err := NewStore(ctx, dbPath, loc)
 	if err != nil {
 		t.Fatalf("Failed to create store: %v", err)
 	}
@@ -34,8 +36,10 @@ func TestGetTodayReminder(t *testing.T) {
 	if reminder.Acknowledged {
 		t.Errorf("Expected reminder to not be acknowledged")
 	}
-	if reminder.Date != time.Now().Format("2006-01-02") {
-		t.Errorf("Expected date %s, got %s", time.Now().Format("2006-01-02"), reminder.Date)
+	// Use the same UTC location for comparison
+	expectedDate := time.Now().In(loc).Format("2006-01-02")
+	if reminder.Date != expectedDate {
+		t.Errorf("Expected date %s, got %s", expectedDate, reminder.Date)
 	}
 
 	// Test case: Get the same reminder again, should return the existing one

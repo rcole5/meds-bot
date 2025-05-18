@@ -6,6 +6,7 @@ metadata:
 data:
   DISCORD_CHANNEL_ID: "your-channel-id-here"
   REMINDER_INTERVAL_MINUTES: "30"
+  TIMEZONE: "Australia/Melbourne"
   
   # Medication configurations
   MED_1_NAME: "Morning Pill"

@@ -123,7 +123,15 @@ func (s *Service) checkAndSendReminders(ctx context.Context) error {
 
 // shouldSendReminder checks if it's time to send a reminder for a specific medication
 func (s *Service) shouldSendReminder(medication config.Medication) bool {
-	now := time.Now()
+	// Get the location from the config
+	loc, err := s.config.GetLocation()
+	if err != nil {
+		log.Printf("Error getting timezone location: %v, using UTC", err)
+		loc = time.UTC
+	}
+
+	// Get the current time in the configured timezone
+	now := time.Now().In(loc)
 	currentHour := now.Hour()
 
 	// Check if it's time for this medication
