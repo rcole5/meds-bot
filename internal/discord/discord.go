@@ -178,7 +178,7 @@ func (c *Client) RegisterMedicationHandler(ctx context.Context) {
 			return
 		}
 
-		err = c.store.UpdateReminderStatus(ctx, reminder.ID, true, "")
+		err = c.store.UpdateReminderStatus(ctx, reminder.ID, true, i.Message.ID)
 		if err != nil {
 			log.Printf("Error updating reminder for %s: %v", medicationName, err)
 			c.respondWithError(s, i, fmt.Sprintf("Error updating reminder: %v", err))
@@ -187,21 +187,16 @@ func (c *Client) RegisterMedicationHandler(ctx context.Context) {
 
 		// Update the original message
 		content := fmt.Sprintf("✅ **%s Taken** ✅\nThank you for taking your %s today!", medicationName, medicationName)
-		_, err = s.ChannelMessageEdit(c.channelID, i.Message.ID, content)
-		if err != nil {
-			log.Printf("Error updating message for %s: %v", medicationName, err)
-		}
 
-		// Remove the button
-		var components []discordgo.MessageComponent
+		// Remove the button by setting empty components and update the message content
 		_, err = s.ChannelMessageEditComplex(&discordgo.MessageEdit{
 			Channel:    c.channelID,
 			ID:         i.Message.ID,
 			Content:    &content,
-			Components: &components,
+			Components: &[]discordgo.MessageComponent{},
 		})
 		if err != nil {
-			log.Printf("Error removing button for %s: %v", medicationName, err)
+			log.Printf("Error updating message for %s: %v", medicationName, err)
 		}
 
 		err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
