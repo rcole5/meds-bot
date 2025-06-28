@@ -5,6 +5,7 @@ A Discord bot that sends medication reminders at specified times and tracks ackn
 ## Features
 
 - Sends reminders for medications at configured times
+- Supports both daily and weekly medication schedules
 - Allows users to acknowledge taking medications via a button click
 - Continues to send reminders every configured interval until acknowledged
 - Supports multiple medications with different schedules
@@ -75,8 +76,12 @@ You can configure multiple medications by adding numbered environment variables:
 
 - `MED_1_NAME`: Name of the first medication
 - `MED_1_HOUR`: Hour to send the reminder (24-hour format, 0-23)
+- `MED_1_FREQUENCY`: (Optional) Frequency of the reminder - either "daily" (default) or "weekly"
+- `MED_1_DAY`: (Required for weekly frequency) Day of the week to send the reminder (e.g., "monday", "tuesday", etc.)
 - `MED_2_NAME`: Name of the second medication
 - `MED_2_HOUR`: Hour to send the reminder for the second medication
+- `MED_2_FREQUENCY`: (Optional) Frequency of the second medication
+- `MED_2_DAY`: (Required for weekly frequency) Day of the week for the second medication
 - And so on...
 
 ## How It Works

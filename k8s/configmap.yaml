@@ -7,13 +7,17 @@ data:
   DISCORD_CHANNEL_ID: "your-channel-id-here"
   REMINDER_INTERVAL_MINUTES: "30"
   TIMEZONE: "Australia/Melbourne"
-  
+
   # Medication configurations
   MED_1_NAME: "Morning Pill"
   MED_1_HOUR: "8"
-  
+  MED_1_FREQUENCY: "daily"
+
   MED_2_NAME: "Morning Vitamin"
   MED_2_HOUR: "9"
-  
+  MED_2_FREQUENCY: "daily"
+
   MED_3_NAME: "Afternoon Pill"
   MED_3_HOUR: "14"
+  MED_3_FREQUENCY: "weekly"
+  MED_3_DAY: "monday"

@@ -32,8 +32,10 @@ type Config struct {
 }
 
 type Medication struct {
-	Name string
-	Hour int
+	Name      string
+	Hour      int
+	Frequency string
+	Day       string
 }
 
 // LoadConfig loads the application configuration from environment variables by default
@@ -101,6 +103,18 @@ func validateConfig(cfg *Config) error {
 		}
 		if med.Hour < 0 || med.Hour > 23 {
 			return fmt.Errorf("medication %s has invalid hour: %d (must be between 0 and 23)", med.Name, med.Hour)
+		}
+
+		// Validate frequency
+		if med.Frequency == "" {
+			med.Frequency = "daily" // Default to daily if not specified
+		} else if med.Frequency != "daily" && med.Frequency != "weekly" {
+			return fmt.Errorf("medication %s has invalid frequency: %s (must be 'daily' or 'weekly')", med.Name, med.Frequency)
+		}
+
+		// Validate day for weekly medications
+		if med.Frequency == "weekly" && med.Day == "" {
+			return fmt.Errorf("medication %s has weekly frequency but no day specified", med.Name)
 		}
 	}
 
@@ -181,13 +195,29 @@ func LoadEnvConfig() (*Config, error) {
 			continue
 		}
 
+		// Get frequency (default to "daily" if not specified)
+		frequencyKey := fmt.Sprintf("MED_%d_FREQUENCY", i)
+		frequency := os.Getenv(frequencyKey)
+		if frequency == "" {
+			frequency = "daily"
+		}
+
+		// Get day (only needed for weekly frequency)
+		day := ""
+		if frequency == "weekly" {
+			dayKey := fmt.Sprintf("MED_%d_DAY", i)
+			day = os.Getenv(dayKey)
+		}
+
 		// Add the medication to our list
 		medications = append(medications, Medication{
-			Name: name,
-			Hour: hour,
+			Name:      name,
+			Hour:      hour,
+			Frequency: frequency,
+			Day:       day,
 		})
 
-		log.Printf("Loaded medication: %s, hour: %d\n", name, hour)
+		log.Printf("Loaded medication: %s, hour: %d, frequency: %s, day: %s\n", name, hour, frequency, day)
 	}
 
 	config := &Config{

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -133,6 +134,22 @@ func (s *Service) shouldSendReminder(medication config.Medication) bool {
 	// Get the current time in the configured timezone
 	now := time.Now().In(loc)
 	currentHour := now.Hour()
+
+	// Default to daily if frequency is not specified
+	if medication.Frequency == "" {
+		medication.Frequency = "daily"
+	}
+
+	// For weekly medications, check if today is the specified day
+	if medication.Frequency == "weekly" {
+		// Get the current day of the week
+		currentDay := strings.ToLower(now.Weekday().String())
+
+		// If the day doesn't match, don't send a reminder
+		if strings.ToLower(medication.Day) != currentDay {
+			return false
+		}
+	}
 
 	// Check if it's time for this medication
 	// Only send reminders if the current hour is within 5 hours of the medication hour and not before the medication hour
