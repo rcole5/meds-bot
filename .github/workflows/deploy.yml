@@ -1,0 +1,36 @@
+name: deploy
+
+on:
+  workflow_run:
+    workflows: ["build"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Only run if the build workflow succeeded or if triggered manually
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Kubernetes context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+
+      - name: Restart Deployment
+        run: |
+          kubectl rollout restart deployment meds-bot -n default
+
+      - name: Verify Rollout
+        run: |
+          kubectl rollout status deployment meds-bot -n default
