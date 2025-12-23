@@ -7,9 +7,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bwmarrin/discordgo"
 	"meds-bot/internal/config"
 	"meds-bot/internal/db"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // ClientInterface defines the interface for Discord operations
@@ -146,6 +147,12 @@ func (c *Client) handleInteraction(s *discordgo.Session, i *discordgo.Interactio
 func (c *Client) RegisterMedicationHandler(ctx context.Context) {
 	c.RegisterHandler("medication_taken_", func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		customID := i.MessageComponentData().CustomID
+
+		if err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+		}); err != nil {
+			log.Printf("Error sending deferred response: %v", err)
+		}
 
 		// Parse the medication name from the customID
 		if len(customID) <= 17 {
